@@ -1,11 +1,18 @@
 package com.github.project.videoeditor.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.github.project.videoeditor.container.Marker;
+import com.github.project.videoeditor.container.Movie;
+
+
 /**
  * 
  * @author Peter Gessler
  * @version 1.0
  * @DevelopmentDate 31.12.2015
- * @LastUpdate -
+ * @LastUpdate 03.01.2016
  * @Assignment Handle important data like marker list and movie data. Refresh
  *             user interface if new data available.
  * 
@@ -13,4 +20,47 @@ package com.github.project.videoeditor.model;
 
 public abstract class AContentHandler {
 
+	protected List<IContentObserver> contentListener;
+	protected List<Marker> markerList;
+	protected Movie movie;
+	
+	// Constructor
+	protected AContentHandler() {
+		
+		setMarkerList(new ArrayList<Marker>());
+		contentListener = new ArrayList<IContentObserver>();
+	}
+	
+	// add content listener
+	public void addContentListener(IContentObserver contentObserver) {
+		contentListener.add(contentObserver);
+	}
+	
+	// remove content listener by listener name.
+	public void removeContentListener(IContentObserver contentObserver) {
+		
+		for (IContentObserver iContentObserver : contentListener) {
+			if (iContentObserver.getName().equals(contentObserver.getName())) {
+				contentListener.remove(contentObserver);
+			}
+		}
+	}
+
+	public List<Marker> getMarkerList() {
+		return markerList;
+	}
+
+	public void setMarkerList(List<Marker> markerList) {
+		this.markerList = markerList;
+	}
+	
+	// method call all listener to refresh her data content
+	protected void refreshDataContent() {
+		
+		for (IContentObserver iContentObserver : contentListener) {
+			iContentObserver.setNewMarkerList(markerList);
+			iContentObserver.setNewMovieInformation(movie);
+		}
+	}
+	
 }
