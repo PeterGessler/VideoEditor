@@ -13,8 +13,8 @@ package com.github.project.videoeditor.container;
 public class Movie {
 
 	private String sourceAddress;
-	private double movLength;
-	private int movsize;
+	private long movLength;
+	private long movsize;
 	
 	private static volatile Movie singleton = null;
 
@@ -32,19 +32,19 @@ public class Movie {
 		this.sourceAddress = sourceAddress;
 	}
 
-	public double getMovLength() {
+	public double getMovDuration() {
 		return movLength;
 	}
 
-	public void setMovLength(double movLength) {
+	public void setMovDuration(long movLength) {
 		this.movLength = movLength;
 	}
 
-	public int getMovsize() {
+	public long getMovsize() {
 		return movsize;
 	}
 
-	public void setMovsize(int movsize) {
+	public void setMovsize(long movsize) {
 		this.movsize = movsize;
 	}
 	

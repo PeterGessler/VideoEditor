@@ -5,6 +5,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import com.github.project.videoeditor.gui.GUI;
+import com.github.project.videoeditor.iosystem.IFileObserver;
 import com.github.project.videoeditor.model.EditorHandler;
 
 
@@ -38,14 +39,13 @@ public class VideoEditorLauncher {
 			e.printStackTrace();
 		}
 
-		final EditorHandler model = new EditorHandler();
+		final IFileObserver model = new EditorHandler();
 
 		// start GUI
 		GUI guiGeneral = new GUI("VideoEditor", model);
-		model.setGui(guiGeneral);
 		guiGeneral.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		guiGeneral.pack();
-		guiGeneral.setSize(800, 600);
+		guiGeneral.setSize(1024, 768);
 		guiGeneral.setVisible(true);
 
 	}

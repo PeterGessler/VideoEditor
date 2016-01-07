@@ -36,8 +36,6 @@ public class MarkerHandler extends AContentHandler {
 
 		markerList.add(newMarker);
 
-		// refresh data
-		refreshDataContent();
 	}
 
 	// delete one marker from list
@@ -45,8 +43,6 @@ public class MarkerHandler extends AContentHandler {
 
 		markerList.remove(markerIndex);
 
-		// refresh data
-		refreshDataContent();
 	}
 
 	/**
@@ -59,8 +55,6 @@ public class MarkerHandler extends AContentHandler {
 
 		markerList.set(markerIndex, modifiedMarker);
 
-		// refresh data
-		refreshDataContent();
 	}
 
 	// delete all marker
@@ -68,8 +62,6 @@ public class MarkerHandler extends AContentHandler {
 
 		markerList.clear();
 
-		// refresh data
-		refreshDataContent();
 	}
 
 	// get marker from MarkerList

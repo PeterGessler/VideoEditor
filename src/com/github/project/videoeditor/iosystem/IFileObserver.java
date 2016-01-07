@@ -1,5 +1,7 @@
 package com.github.project.videoeditor.iosystem;
 
+import java.io.File;
+
 /**
  * 
  * @author Peter Gessler
@@ -13,4 +15,7 @@ package com.github.project.videoeditor.iosystem;
 
 public interface IFileObserver {
 
+	public void newMovieFileAvailable(File movieFile);
+	
+	public void newMarkerFileAvailable(File markerFile);
 }

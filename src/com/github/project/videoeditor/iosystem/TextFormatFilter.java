@@ -14,17 +14,17 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * 
  */
 
-public class TextFormatFileFilter implements IFileFilter {
+public class TextFormatFilter implements IFileFilter {
 
-	private static volatile TextFormatFileFilter singleton = null;
+	private static volatile TextFormatFilter singleton = null;
 
-	public static synchronized TextFormatFileFilter getInstance() {
+	public static synchronized TextFormatFilter getInstance() {
 		if (singleton == null)
-			singleton = new TextFormatFileFilter();
+			singleton = new TextFormatFilter();
 		return singleton;
 	}
 
-	private TextFormatFileFilter() {
+	private TextFormatFilter() {
 		super();
 	}
 

@@ -54,6 +54,10 @@ public abstract class AContentHandler {
 		this.markerList = markerList;
 	}
 	
+	public void setCurrentMovie(Movie movie) {
+		this.movie = movie;
+	}
+	
 	// method call all listener to refresh her data content
 	protected void refreshDataContent() {
 		

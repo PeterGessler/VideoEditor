@@ -10,6 +10,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.List;
 import java.util.Vector;
 
@@ -17,6 +18,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -25,9 +27,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 
 import com.github.project.videoeditor.container.Marker;
 import com.github.project.videoeditor.container.Movie;
+import com.github.project.videoeditor.iosystem.AFileFilter;
+import com.github.project.videoeditor.iosystem.FileFormatFilter;
+import com.github.project.videoeditor.iosystem.IFileObserver;
+import com.github.project.videoeditor.iosystem.MovieFormatFilter;
+import com.github.project.videoeditor.iosystem.TextFormatFilter;
+import com.github.project.videoeditor.model.AContentHandler;
 import com.github.project.videoeditor.model.EditorHandler;
 import com.github.project.videoeditor.model.IContentObserver;
 import com.github.project.videoeditor.model.MarkerHandler;
@@ -42,29 +52,39 @@ import com.github.project.videoeditor.model.MarkerHandler;
  * 
  */
 
-public class GUI extends JFrame {
+public class GUI extends JFrame implements IContentObserver {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6886137606438237473L;
-	private EditorHandler model;
 	private JList<Marker> markerList;
-	private JTable table;
+	private DefaultTableModel tableModel;
+	private IFileObserver fileInputObserver;
+	private AContentHandler contentHandler;
 
 	String[] tableColumnNames = { "Id", "Marker name", "Start time", "End time" };
-	
-	String[][] tableRowData = {};
 
+	String[][] tableRowData = {};
 
 	private JPanel leftPanelMain = null;
 	private JPanel leftPanelTop = null;
 	private JPanel leftPanelBottom = null;
 
+	private JLabel srcAddrInputLabel;
+	private JLabel movDurationInputLabel;
+	private JLabel movSizeInputLabel;
+	
+	private JTable table;
+
 	// constructor
-	public GUI(String name, EditorHandler model) {
+	public GUI(String name, IFileObserver editorHandler) {
 		super(name);
-		this.model = model;
+
+		fileInputObserver = editorHandler;
+
+		contentHandler = MarkerHandler.getInstance();
+		contentHandler.addContentListener(this);
 		buildComponent();
 	}
 
@@ -79,7 +99,7 @@ public class GUI extends JFrame {
 	private JPanel buildLeftView() {
 
 		leftPanelMain = new JPanel(new GridLayout(2, 0));
-		leftPanelMain.setPreferredSize(new Dimension(200, 600));
+		leftPanelMain.setPreferredSize(new Dimension(300, 600));
 
 		buildLeftPanelTop();
 		buildLeftPanelBottom();
@@ -97,19 +117,19 @@ public class GUI extends JFrame {
 		leftPanelTop.setBorder(BorderFactory.createLineBorder(Color.darkGray));
 
 		JLabel srcAddrTxtLabel = new JLabel("Src.: ");
-		JLabel srcAddrInputLabel = new JLabel("", 10);
+		srcAddrInputLabel = new JLabel("", 10);
 
 		leftPanelTop.add(srcAddrTxtLabel);
 		leftPanelTop.add(srcAddrInputLabel);
 
 		JLabel movLengthLabel = new JLabel("Movie time: ");
-		JLabel movLengthInputLabel = new JLabel("", 10);
+		movDurationInputLabel = new JLabel("", 10);
 
 		leftPanelTop.add(movLengthLabel);
-		leftPanelTop.add(movLengthInputLabel);
+		leftPanelTop.add(movDurationInputLabel);
 
 		JLabel movSizeLabel = new JLabel("Movie length: ");
-		JLabel movSizeInputLabel = new JLabel("", 10);
+		movSizeInputLabel = new JLabel("", 10);
 
 		leftPanelTop.add(movSizeLabel);
 		leftPanelTop.add(movSizeInputLabel);
@@ -127,7 +147,22 @@ public class GUI extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				JFileChooser chooser = new JFileChooser("Video waehlen");
+
+				AFileFilter fileFilter = FileFormatFilter.getInstance();
+				fileFilter.setFileFilterStrategy(MovieFormatFilter
+						.getInstance());
+
+				chooser.setFileFilter(fileFilter.getFormatFilter());
+
+				int windowFeedback = chooser.showOpenDialog(null);
+
+				if (windowFeedback == JFileChooser.APPROVE_OPTION) {
+
+					fileInputObserver.newMovieFileAvailable(chooser
+							.getSelectedFile());
+				}
 
 			}
 		});
@@ -137,7 +172,21 @@ public class GUI extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				JFileChooser chooser = new JFileChooser("Video waehlen");
+
+				AFileFilter fileFilter = FileFormatFilter.getInstance();
+				fileFilter.setFileFilterStrategy(TextFormatFilter.getInstance());
+
+				chooser.setFileFilter(fileFilter.getFormatFilter());
+
+				int windowFeedback = chooser.showOpenDialog(null);
+
+				if (windowFeedback == JFileChooser.APPROVE_OPTION) {
+
+					fileInputObserver.newMarkerFileAvailable(chooser
+							.getSelectedFile());
+				}
 
 			}
 		});
@@ -221,25 +270,59 @@ public class GUI extends JFrame {
 	private JPanel buildCenterView() {
 
 		final JPanel centerPanel = new JPanel(new BorderLayout());
-		table = new JTable(tableRowData, tableColumnNames );
-		centerPanel.add( new JScrollPane( table ) );
-		//markerList = new JList<Marker>(new Vector<>(MarkerHandler.getInstance().getMarkerItems()));
-		//centerPanel.add(new JScrollPane(markerList), BorderLayout.CENTER);
+		tableModel = new DefaultTableModel(tableColumnNames, 0);
+		
+		table = new JTable(tableModel);
+		centerPanel.add(new JScrollPane(table));
+		// markerList = new JList<Marker>(new
+		// Vector<>(MarkerHandler.getInstance().getMarkerItems()));
+		// centerPanel.add(new JScrollPane(markerList), BorderLayout.CENTER);
 
 		return centerPanel;
 	}
 
-	// update information if we load a movie
-	public void updateMovieInformation(Movie movie) {
-		// TODO Auto-generated method stub
+	@Override
+	public void setNewMarkerList(List<Marker> markerList) {
 
+		// delete all
+		if (tableModel.getRowCount() > 0) {
+		    for (int i = tableModel.getRowCount() - 1; i > -1; i--) {
+		    	tableModel.removeRow(i);
+		    }
+		}
+		
+		// set new
+		if (!markerList.isEmpty()) {
+
+			for (int i = 0; i < markerList.size(); i++) {
+				int id = markerList.get(i).getMarkerId();
+				String markerName = markerList.get(i).getMarkerName();
+				double startTime = markerList.get(i).getStartTime();
+				double endTime = markerList.get(i).getEndTime();
+
+				String[] data = {String.valueOf(id), markerName, String.valueOf(startTime), String.valueOf(endTime)};
+
+				tableModel.addRow(data);
+
+			}
+
+		}
+		/*
+		 * this.markerList.setListData(new Vector<>(MarkerHandler.getInstance()
+		 * .getMarkerItems()));
+		 */
 	}
 
-	// update marker information
-	public void updateMarkerList(List<Marker> markerList) {
+	@Override
+	public void setNewMovieInformation(Movie movie) {
 
-		this.markerList.setListData(new Vector<>(MarkerHandler.getInstance()
-				.getMarkerItems()));
+		if (movie != null) {
+			srcAddrInputLabel.setText(movie.getSourceAddress());
+			movDurationInputLabel.setText(String.format("%.3f" + " sec",
+					movie.getMovDuration() / 1000));
+			movSizeInputLabel.setText(String.valueOf(movie.getMovsize())
+					+ " kB");
+		}
 
 	}
 

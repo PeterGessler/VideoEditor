@@ -10,13 +10,13 @@ import javax.swing.filechooser.FileFilter;
  * @version 1.0
  * @DevelopmentDate 31.12.2015
  * @LastUpdate 03.01.2016
- * @Assignment Class to instantiate filter.
+ * @Assignment Class to set filter strategy.
  * 
  */
 
 public abstract class AFileFilter {
 
-	IFileFilter fileFilterStrategy = TextFormatFileFilter.getInstance();
+	IFileFilter fileFilterStrategy = TextFormatFilter.getInstance();
 	
 	// init filter with text filter strategy
 	protected AFileFilter() {
