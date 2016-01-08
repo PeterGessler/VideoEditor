@@ -5,9 +5,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import com.github.project.videoeditor.container.Marker;
 import com.github.project.videoeditor.container.Movie;
 import com.github.project.videoeditor.gui.GUI;
+import com.github.project.videoeditor.gui.OverwriteDialog;
 import com.github.project.videoeditor.iosystem.IFileObserver;
 import com.xuggle.xuggler.IContainer;
 
@@ -24,8 +28,6 @@ import com.xuggle.xuggler.IContainer;
 
 public class EditorHandler implements IFileObserver {
 
-	private static final String className = "EditorHandler";
-	private GUI gui;
 	private MarkerHandler contentHandler;
 
 	@Override
@@ -41,6 +43,8 @@ public class EditorHandler implements IFileObserver {
 				IContainer.Type.READ, null);
 		Movie.getInstance().setMovDuration(container.getDuration() / 1000);
 
+		contentHandler.setStoreDirectory(movieFile.getParent());
+
 		contentHandler.setCurrentMovie(Movie.getInstance());
 
 		contentHandler.refreshDataContent();
@@ -50,13 +54,27 @@ public class EditorHandler implements IFileObserver {
 	public void newMarkerFileAvailable(File markerFile) {
 
 		this.contentHandler = MarkerHandler.getInstance();
-		
+
+		contentHandler.setMarkerlistPath(markerFile.getAbsolutePath());
+
 		// remove all marker from list
-		contentHandler.getMarkerList().clear();
-		
+		if (!contentHandler.getMarkerList().isEmpty()) {
+
+			JFrame dialogFrame = new JFrame();
+			JOptionPane optionPane = new OverwriteDialog(dialogFrame);
+		}
+
 		try {
 
-			int id = 0;
+			int id;
+
+			if (contentHandler.getMarkerList().isEmpty()) {
+				id = 0;
+			} else {
+				id = contentHandler.getMarkerList()
+						.get(contentHandler.getMarkerList().size() - 1)
+						.getMarkerId() + 1;
+			}
 
 			FileReader fileReader = new FileReader(markerFile.getPath());
 			BufferedReader buffReader = new BufferedReader(fileReader);
@@ -72,13 +90,13 @@ public class EditorHandler implements IFileObserver {
 						Double.valueOf(columnDetail[1].replace(',', '.')));
 
 				contentHandler.addMarkerToList(newMarker);
-				
+
 				// increment counter
 				id++;
 			}
 
 			buffReader.close();
-			
+
 			contentHandler.refreshDataContent();
 
 		} catch (IOException e) {

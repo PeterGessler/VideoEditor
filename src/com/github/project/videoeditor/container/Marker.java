@@ -29,6 +29,10 @@ public class Marker {
 	public int getMarkerId() {
 		return markerId;
 	}
+	
+	public void setMarkerId(int markerId) {
+		this.markerId = markerId;
+	}
 
 	public String getMarkerName() {
 		return markerName;

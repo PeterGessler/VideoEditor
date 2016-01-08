@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -60,7 +61,7 @@ public class GUI extends JFrame implements IContentObserver {
 	private static final long serialVersionUID = 6886137606438237473L;
 	private JList<Marker> markerList;
 	private DefaultTableModel tableModel;
-	private IFileObserver fileInputObserver;
+	private IFileObserver editorModel;
 	private AContentHandler contentHandler;
 
 	String[] tableColumnNames = { "Id", "Marker name", "Start time", "End time" };
@@ -74,14 +75,14 @@ public class GUI extends JFrame implements IContentObserver {
 	private JLabel srcAddrInputLabel;
 	private JLabel movDurationInputLabel;
 	private JLabel movSizeInputLabel;
-	
+
 	private JTable table;
 
 	// constructor
 	public GUI(String name, IFileObserver editorHandler) {
 		super(name);
 
-		fileInputObserver = editorHandler;
+		editorModel = editorHandler;
 
 		contentHandler = MarkerHandler.getInstance();
 		contentHandler.addContentListener(this);
@@ -160,8 +161,7 @@ public class GUI extends JFrame implements IContentObserver {
 
 				if (windowFeedback == JFileChooser.APPROVE_OPTION) {
 
-					fileInputObserver.newMovieFileAvailable(chooser
-							.getSelectedFile());
+					editorModel.newMovieFileAvailable(chooser.getSelectedFile());
 				}
 
 			}
@@ -184,7 +184,7 @@ public class GUI extends JFrame implements IContentObserver {
 
 				if (windowFeedback == JFileChooser.APPROVE_OPTION) {
 
-					fileInputObserver.newMarkerFileAvailable(chooser
+					editorModel.newMarkerFileAvailable(chooser
 							.getSelectedFile());
 				}
 
@@ -199,7 +199,8 @@ public class GUI extends JFrame implements IContentObserver {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				MarkerCreatorFrame.getInstance().createFrame();
 
 			}
 		});
@@ -209,7 +210,14 @@ public class GUI extends JFrame implements IContentObserver {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				try {
+				int selectedRow = table.getSelectedRow();
+
+				MarkerHandler.getInstance().deleteMarkerFromList(selectedRow);
+				} catch (ArrayIndexOutOfBoundsException error) {
+					
+				}
 
 			}
 		});
@@ -222,21 +230,46 @@ public class GUI extends JFrame implements IContentObserver {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				try {
+
+					int selectedRow = table.getSelectedRow();
+
+					Marker selectedMarker = MarkerHandler.getInstance()
+							.getMarkerFromList(selectedRow);
+
+					MarkerEditorFrame.getInstance().showMarkereditorFrame();
+					MarkerEditorFrame.getInstance().initMarkerValues(
+							selectedMarker);
+
+				} catch (ArrayIndexOutOfBoundsException error) {
+
+				}
 
 			}
 		});
-		editmarkerBtn.setText("Delete marker");
+		editmarkerBtn.setText("Edit marker");
 
 		JButton saveDirBtn = new JButton(new AbstractAction() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				JFileChooser chooser = new JFileChooser("Speicherort");
+				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+				int windowFeedback = chooser.showOpenDialog(null);
+
+				if (windowFeedback == JFileChooser.APPROVE_OPTION) {
+
+					contentHandler.setStoreDirectory(chooser.getSelectedFile()
+							.getAbsolutePath());
+				}
 
 			}
 		});
-		saveDirBtn.setText("Save directory");
+		String twoLines = "Choose store\ndirectory";
+		saveDirBtn.setText("<html><center>" + twoLines.replaceAll("\\n", "<br>") + "</center></html>");
 
 		leftPanelBottom.add(editmarkerBtn);
 		leftPanelBottom.add(saveDirBtn);
@@ -245,7 +278,14 @@ public class GUI extends JFrame implements IContentObserver {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				// TODO overwrite dialog and choose create store file
+				if (MarkerHandler.getInstance().getMarkerlistPath() != null) {
+					
+					MarkerHandler.getInstance().writeMarkerlist();
+				} else {
+					
+				}
 
 			}
 		});
@@ -271,9 +311,10 @@ public class GUI extends JFrame implements IContentObserver {
 
 		final JPanel centerPanel = new JPanel(new BorderLayout());
 		tableModel = new DefaultTableModel(tableColumnNames, 0);
-		
+
 		table = new JTable(tableModel);
 		centerPanel.add(new JScrollPane(table));
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		// markerList = new JList<Marker>(new
 		// Vector<>(MarkerHandler.getInstance().getMarkerItems()));
 		// centerPanel.add(new JScrollPane(markerList), BorderLayout.CENTER);
@@ -286,11 +327,11 @@ public class GUI extends JFrame implements IContentObserver {
 
 		// delete all
 		if (tableModel.getRowCount() > 0) {
-		    for (int i = tableModel.getRowCount() - 1; i > -1; i--) {
-		    	tableModel.removeRow(i);
-		    }
+			for (int i = tableModel.getRowCount() - 1; i > -1; i--) {
+				tableModel.removeRow(i);
+			}
 		}
-		
+
 		// set new
 		if (!markerList.isEmpty()) {
 
@@ -300,17 +341,15 @@ public class GUI extends JFrame implements IContentObserver {
 				double startTime = markerList.get(i).getStartTime();
 				double endTime = markerList.get(i).getEndTime();
 
-				String[] data = {String.valueOf(id), markerName, String.valueOf(startTime), String.valueOf(endTime)};
+				String[] data = { String.valueOf(id), markerName,
+						(String.valueOf(startTime) + " sec"), (String.valueOf(endTime) + " sec")};
 
 				tableModel.addRow(data);
 
 			}
 
 		}
-		/*
-		 * this.markerList.setListData(new Vector<>(MarkerHandler.getInstance()
-		 * .getMarkerItems()));
-		 */
+
 	}
 
 	@Override

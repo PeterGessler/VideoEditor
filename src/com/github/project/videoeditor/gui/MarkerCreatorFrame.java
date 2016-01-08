@@ -1,10 +1,15 @@
 package com.github.project.videoeditor.gui;
 
-import java.awt.*;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import com.github.project.videoeditor.container.Marker;
 import com.github.project.videoeditor.model.MarkerHandler;
@@ -19,9 +24,9 @@ import com.github.project.videoeditor.model.MarkerHandler;
  * 
  */
 
-public class MarkerEditorFrame {
+public class MarkerCreatorFrame {
 
-	JFrame markerEditframeParent = null;
+	JFrame markerCreatorFrameParent = null;
 
 	private int markerId;
 	private String markerName;
@@ -48,20 +53,21 @@ public class MarkerEditorFrame {
 	private String[] labels = { "Id: ", "Name: ", "Start in Min/Sec/Ms: ",
 			"End in Min/Sec/Ms: " };
 
-	private static volatile MarkerEditorFrame singleton = null;
+	private static volatile MarkerCreatorFrame singleton = null;
 
-	public static synchronized MarkerEditorFrame getInstance() {
+	public static synchronized MarkerCreatorFrame getInstance() {
 		if (singleton == null)
-			singleton = new MarkerEditorFrame();
+			singleton = new MarkerCreatorFrame();
 		return singleton;
 	}
 
 	// Constructor
-	private MarkerEditorFrame() {
+	private MarkerCreatorFrame() {
 
 		// Create and set up the window.
-		markerEditframeParent = new JFrame("Marker Editor");
-		markerEditframeParent.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		markerCreatorFrameParent = new JFrame("Marker Creator");
+		markerCreatorFrameParent
+				.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JPanel panelContent = new JPanel(new GridLayout(0, 2));
 
@@ -114,22 +120,15 @@ public class MarkerEditorFrame {
 		// button components
 		saveButton = new JButton(new AbstractAction() {
 
-			private static final long serialVersionUID = 3953683242917043246L;
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				saveValues();
 			}
 		});
-		saveButton.setName("Speichern");
-		saveButton.setText("Speichern");
+		saveButton.setName("Hinzufügen");
+		saveButton.setText("Hinzufügen");
 
 		abortButton = new JButton(new AbstractAction() {
-
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 6278932109092556121L;
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -144,38 +143,38 @@ public class MarkerEditorFrame {
 
 		// Set up the content pane.
 		panelContent.setOpaque(true); // content panes must be opaque
-		markerEditframeParent.setContentPane(panelContent);
+		markerCreatorFrameParent.setContentPane(panelContent);
 
 	}
 
-	public void showMarkereditorFrame() {
-
+	public void createFrame() {
 		// Display the window.
-		markerEditframeParent.pack();
-		markerEditframeParent.setVisible(true);
+		markerCreatorFrameParent.pack();
+		markerCreatorFrameParent.setVisible(true);
+
+		setNewMarkerId();
+
+		nameTxtField.setText("");
+		startTimeTxtFieldMin.setText("");
+		startTimeTxtFieldSec.setText("");
+		startTimeTxtFieldMilliSeconds.setText("");
+		endTimeTxtFieldMin.setText("");
+		endTimeTxtFieldSec.setText("");
+		endTimeTxtFieldMilliSeconds.setText("");
 	}
 
-	// method to init marker values
-	public void initMarkerValues(Marker marker) {
+	// set initial marker id
+	private void setNewMarkerId() {
 
-		markerId = marker.getMarkerId();
-
-		idTxtLabel.setText(String.valueOf(marker.getMarkerId()));
-		nameTxtField.setText(marker.getMarkerName());
-
-		startTimeTxtFieldMin.setText(String.valueOf(formatTime(
-				marker.getStartTime()).getMinutes()));
-		startTimeTxtFieldSec.setText(String.valueOf(formatTime(
-				marker.getStartTime()).getSeconds()));
-		startTimeTxtFieldMilliSeconds.setText(String.valueOf(formatTime(
-				marker.getStartTime()).getMilliSeconds()));
-
-		endTimeTxtFieldMin.setText(String.valueOf(formatTime(
-				marker.getEndTime()).getMinutes()));
-		endTimeTxtFieldSec.setText(String.valueOf(formatTime(
-				marker.getEndTime()).getSeconds()));
-		endTimeTxtFieldMilliSeconds.setText(String.valueOf(formatTime(
-				marker.getEndTime()).getMilliSeconds()));
+		try {
+			MarkerHandler markerHandler = MarkerHandler.getInstance();
+			markerId = markerHandler.getMarkerList()
+					.get(markerHandler.getMarkerList().size() - 1)
+					.getMarkerId() + 1;
+		} catch (ArrayIndexOutOfBoundsException error) {
+			markerId = 0;
+		}
+		idTxtLabel.setText(String.valueOf(markerId));
 	}
 
 	// store new values
@@ -190,16 +189,17 @@ public class MarkerEditorFrame {
 				endTimeTxtFieldMilliSeconds.getText());
 
 		if (startTime < endTime) {
-			MarkerHandler.getInstance().editMarker(markerId,
+			MarkerHandler.getInstance().addMarkerToList(
 					new Marker(markerId, markerName, startTime, endTime));
+
 			closeWindow();
 		}
 	}
 
 	// close frame without storing
 	private void closeWindow() {
-		markerEditframeParent.dispatchEvent(new WindowEvent(
-				markerEditframeParent, WindowEvent.WINDOW_CLOSING));
+		markerCreatorFrameParent.dispatchEvent(new WindowEvent(
+				markerCreatorFrameParent, WindowEvent.WINDOW_CLOSING));
 	}
 
 	// format to String

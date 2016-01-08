@@ -1,5 +1,6 @@
 package com.github.project.videoeditor.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public abstract class AContentHandler {
 	protected List<IContentObserver> contentListener;
 	protected List<Marker> markerList;
 	protected Movie movie;
+	private String storeDirectoryPath;
 	
 	// Constructor
 	protected AContentHandler() {
@@ -58,13 +60,25 @@ public abstract class AContentHandler {
 		this.movie = movie;
 	}
 	
-	// method call all listener to refresh her data content
+	// Method call all listener to refresh her data content
 	protected void refreshDataContent() {
 		
 		for (IContentObserver iContentObserver : contentListener) {
 			iContentObserver.setNewMarkerList(markerList);
 			iContentObserver.setNewMovieInformation(movie);
 		}
+	}
+
+	// Method to set store directory
+	public void setStoreDirectory(String path) {
+
+		storeDirectoryPath = path;
+		
+	}
+	
+	// Method to get store directory
+	public String getStoreDirectory() {
+		return storeDirectoryPath;
 	}
 	
 }

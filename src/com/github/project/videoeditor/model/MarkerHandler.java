@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.github.project.videoeditor.container.Marker;
+import com.github.project.videoeditor.iosystem.MarkerListWriter;
 
 
 /**
@@ -19,6 +20,8 @@ import com.github.project.videoeditor.container.Marker;
 public class MarkerHandler extends AContentHandler {
 
 	private static volatile MarkerHandler singleton = null;
+	
+	private String markerListPath;
 
 	public static synchronized MarkerHandler getInstance() {
 		if (singleton == null)
@@ -35,6 +38,7 @@ public class MarkerHandler extends AContentHandler {
 	public void addMarkerToList(Marker newMarker) {
 
 		markerList.add(newMarker);
+		refreshDataContent();
 
 	}
 
@@ -42,6 +46,15 @@ public class MarkerHandler extends AContentHandler {
 	public void deleteMarkerFromList(int markerIndex) {
 
 		markerList.remove(markerIndex);
+		
+		while (markerIndex < markerList.size()) {
+			
+			markerList.get(markerIndex).setMarkerId(markerIndex);
+			
+			markerIndex++;
+		}
+		
+		refreshDataContent();
 
 	}
 
@@ -54,6 +67,7 @@ public class MarkerHandler extends AContentHandler {
 	public void editMarker(int markerIndex, Marker modifiedMarker) {
 
 		markerList.set(markerIndex, modifiedMarker);
+		refreshDataContent();
 
 	}
 
@@ -71,5 +85,19 @@ public class MarkerHandler extends AContentHandler {
 	
 	public Collection<Marker> getMarkerItems() {
 		return Collections.unmodifiableList(markerList);
+	}
+
+	public void setMarkerlistPath(String markerListPath) {
+		this.markerListPath = markerListPath;
+	}
+	
+	public String getMarkerlistPath() {
+		return this.markerListPath;
+	}
+	
+	public void writeMarkerlist() {
+		
+		MarkerListWriter.getInstance().setStorePath(markerListPath);
+		MarkerListWriter.getInstance().writeMarkerlist(getMarkerList());
 	}
 }
