@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 import com.github.project.videoeditor.container.Marker;
+import com.github.project.videoeditor.container.Movie;
 import com.github.project.videoeditor.model.MarkerHandler;
 
 /**
@@ -189,7 +190,7 @@ public class MarkerEditorFrame {
 				endTimeTxtFieldSec.getText(),
 				endTimeTxtFieldMilliSeconds.getText());
 
-		if (startTime < endTime) {
+		if (startTime < endTime && endTime < Movie.getInstance().getMovDuration()) {
 			MarkerHandler.getInstance().editMarker(markerId,
 					new Marker(markerId, markerName, startTime, endTime));
 			closeWindow();

@@ -13,7 +13,7 @@ import java.io.File;
  */
 
 
-public interface IFileObserver {
+public interface IInputFileObserver {
 
 	public void newMovieFileAvailable(File movieFile);
 	

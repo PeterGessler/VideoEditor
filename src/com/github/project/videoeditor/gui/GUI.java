@@ -35,7 +35,7 @@ import com.github.project.videoeditor.container.Marker;
 import com.github.project.videoeditor.container.Movie;
 import com.github.project.videoeditor.iosystem.AFileFilter;
 import com.github.project.videoeditor.iosystem.FileFormatFilter;
-import com.github.project.videoeditor.iosystem.IFileObserver;
+import com.github.project.videoeditor.iosystem.IInputFileObserver;
 import com.github.project.videoeditor.iosystem.MovieFormatFilter;
 import com.github.project.videoeditor.iosystem.TextFormatFilter;
 import com.github.project.videoeditor.model.AContentHandler;
@@ -61,10 +61,10 @@ public class GUI extends JFrame implements IContentObserver {
 	private static final long serialVersionUID = 6886137606438237473L;
 	private JList<Marker> markerList;
 	private DefaultTableModel tableModel;
-	private IFileObserver editorModel;
+	private EditorHandler editorModel;
 	private AContentHandler contentHandler;
 
-	String[] tableColumnNames = { "Id", "Marker name", "Start time", "End time" };
+	String[] tableColumnNames = { "Id", "Marker/Movie name", "Start time", "End time" };
 
 	String[][] tableRowData = {};
 
@@ -79,7 +79,7 @@ public class GUI extends JFrame implements IContentObserver {
 	private JTable table;
 
 	// constructor
-	public GUI(String name, IFileObserver editorHandler) {
+	public GUI(String name, EditorHandler editorHandler) {
 		super(name);
 
 		editorModel = editorHandler;
@@ -295,7 +295,8 @@ public class GUI extends JFrame implements IContentObserver {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+
+				editorModel.startCutProcess();
 
 			}
 		});
@@ -315,9 +316,6 @@ public class GUI extends JFrame implements IContentObserver {
 		table = new JTable(tableModel);
 		centerPanel.add(new JScrollPane(table));
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		// markerList = new JList<Marker>(new
-		// Vector<>(MarkerHandler.getInstance().getMarkerItems()));
-		// centerPanel.add(new JScrollPane(markerList), BorderLayout.CENTER);
 
 		return centerPanel;
 	}

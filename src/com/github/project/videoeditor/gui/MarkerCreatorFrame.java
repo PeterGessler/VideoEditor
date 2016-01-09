@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.github.project.videoeditor.container.Marker;
+import com.github.project.videoeditor.container.Movie;
 import com.github.project.videoeditor.model.MarkerHandler;
 
 /**
@@ -180,20 +181,25 @@ public class MarkerCreatorFrame {
 	// store new values
 	private void saveValues() {
 
-		markerName = nameTxtField.getText();
-		startTime = deformatTime(startTimeTxtFieldMin.getText(),
-				startTimeTxtFieldSec.getText(),
-				startTimeTxtFieldMilliSeconds.getText());
-		endTime = deformatTime(endTimeTxtFieldMin.getText(),
-				endTimeTxtFieldSec.getText(),
-				endTimeTxtFieldMilliSeconds.getText());
+		try {
+			markerName = nameTxtField.getText();
+			startTime = deformatTime(startTimeTxtFieldMin.getText(),
+					startTimeTxtFieldSec.getText(),
+					startTimeTxtFieldMilliSeconds.getText());
+			endTime = deformatTime(endTimeTxtFieldMin.getText(),
+					endTimeTxtFieldSec.getText(),
+					endTimeTxtFieldMilliSeconds.getText());
 
-		if (startTime < endTime) {
-			MarkerHandler.getInstance().addMarkerToList(
-					new Marker(markerId, markerName, startTime, endTime));
+			if (startTime < endTime && endTime < Movie.getInstance().getMovDuration()) {
+				MarkerHandler.getInstance().addMarkerToList(
+						new Marker(markerId, markerName, startTime, endTime));
 
-			closeWindow();
+				closeWindow();
+			}
+		} catch (Exception error) {
+
 		}
+
 	}
 
 	// close frame without storing

@@ -5,7 +5,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import com.github.project.videoeditor.gui.GUI;
-import com.github.project.videoeditor.iosystem.IFileObserver;
+import com.github.project.videoeditor.iosystem.IInputFileObserver;
 import com.github.project.videoeditor.model.EditorHandler;
 
 
@@ -39,7 +39,7 @@ public class VideoEditorLauncher {
 			e.printStackTrace();
 		}
 
-		final IFileObserver model = new EditorHandler();
+		final EditorHandler model = new EditorHandler();
 
 		// start GUI
 		GUI guiGeneral = new GUI("VideoEditor", model);

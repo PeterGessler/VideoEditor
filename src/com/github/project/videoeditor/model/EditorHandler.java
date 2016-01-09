@@ -4,17 +4,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import com.github.project.videoeditor.container.Marker;
 import com.github.project.videoeditor.container.Movie;
-import com.github.project.videoeditor.gui.GUI;
 import com.github.project.videoeditor.gui.OverwriteDialog;
-import com.github.project.videoeditor.iosystem.IFileObserver;
+import com.github.project.videoeditor.iosystem.IInputFileObserver;
 import com.xuggle.xuggler.IContainer;
-
 /**
  * 
  * @author Peter Gessler
@@ -26,10 +25,47 @@ import com.xuggle.xuggler.IContainer;
  * 
  */
 
-public class EditorHandler implements IFileObserver {
+public class EditorHandler implements IInputFileObserver {
 
+	double[] startPos;
+	
+	double[] endPos;
+	
+	String[] markerName;
+	
 	private MarkerHandler contentHandler;
 
+	// 
+	public void startCutProcess() {
+		
+		try {
+			
+			AContentHandler handler = MarkerHandler.getInstance();
+			
+			List<Marker> markerList = handler.getMarkerList();
+			
+			markerName = new String[1];
+			startPos = new double[1];
+			endPos = new double[1];
+			
+			for (int i = 0; i < markerList.size(); i++) {
+				markerName[0] = markerList.get(i).getMarkerName();
+				startPos[0] = markerList.get(i).getStartTime();
+				endPos[0] = markerList.get(i).getEndTime();
+				
+				System.out.println("Im here");
+				
+				Cutter cutter = new Cutter(startPos, endPos, markerName,
+						Movie.getInstance().getSourceAddress(), handler.getStoreDirectory());
+				
+			}
+			
+		} catch (Exception error) {
+			
+		}
+		
+	}
+	
 	@Override
 	public void newMovieFileAvailable(File movieFile) {
 
@@ -60,8 +96,7 @@ public class EditorHandler implements IFileObserver {
 		// remove all marker from list
 		if (!contentHandler.getMarkerList().isEmpty()) {
 
-			JFrame dialogFrame = new JFrame();
-			JOptionPane optionPane = new OverwriteDialog(dialogFrame);
+			JOptionPane optionPane = new OverwriteDialog(new JFrame());
 		}
 
 		try {
